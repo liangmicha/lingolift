@@ -27,15 +27,27 @@
 
 <script setup>
 import { ref } from 'vue';
+import axios from 'axios';
 
 const userInput = ref('');
 const learningLanguage = ref('pt'); // Default learning language
 const primaryLanguage = ref('en'); // Default primary language
 
-const generateExercises = () => {
-  // Logic to be implemented
-  console.log('Exercises generation initiated');
+const fetchAudio = async (phrase) => {
+  try {
+    const response = await axios.get(`http://localhost:5000/get-audio/${phrase}`);
+    console.log(response.data); // Handle the response here
+  } catch (error) {
+    console.error("Error fetching audio:", error);
+  }
 };
+
+const generateExercises = async () => {
+  console.log('Exercises generation initiated');
+  // Call fetchAudio here, replace 'yourPhrase' with the actual phrase
+  await fetchAudio('yourPhrase');
+};
+
 </script>
 
 <style scoped>
