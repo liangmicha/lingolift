@@ -35,8 +35,10 @@ const primaryLanguage = ref('en'); // Default primary language
 
 const fetchAudio = async (phrase) => {
   try {
-    const response = await axios.get(`http://localhost:5000/get-audio/${phrase}`);
-    console.log(response.data); // Handle the response here
+    const response = await axios.get(`http://localhost:5000/get-audio/${phrase}`, { responseType: 'blob' });
+    const url = URL.createObjectURL(new Blob([response.data]));
+    const audio = new Audio(url);
+    audio.play();
   } catch (error) {
     console.error("Error fetching audio:", error);
   }
