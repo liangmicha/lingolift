@@ -25,7 +25,7 @@
       <div class="progress-bar" :style="{ width: progressBarWidth + '%' }"></div>
     </div>
     <div v-if="flashcards.length > 0">
-      <div class="flashcard" @keyup.enter="isCorrectAnswer !== null ? moveToNextFlashcard() : checkTranslation()">
+      <div class="flashcard" @keyup.enter="checkTranslation">
         <button class="play-audio-button" @click="playCurrentCardAudio">Play</button>
 
         <div v-if="showFeedback">
@@ -78,7 +78,7 @@ const isCorrectAnswer = ref(null);
 const showFeedback = ref(false);
 
 const progressBarWidth = computed(() => {
-  const total = flashcards.length;
+  const total = flashcards.value.length;
   const reviewed = flashcardStatus.value.reviewed.length;
   return (reviewed / total) * 100;
 });
@@ -126,7 +126,13 @@ const checkTranslation = () => {
   isCorrectAnswer.value = isCorrect;
   showFeedback.value = true; // Show feedback after checking
 
-  if (!isCorrect && !flashcardStatus.value.needsReview.includes(currentFlashcardIndex.value)) {
+  if (isCorrect) {
+    flashcardStatus.value.reviewed.push(currentFlashcardIndex.value);
+    const index = flashcardStatus.value.needsReview.indexOf(currentFlashcardIndex.value);
+    if (index > -1) {
+      flashcardStatus.value.needsReview.splice(index, 1);
+    }
+  } else if (!flashcardStatus.value.needsReview.includes(currentFlashcardIndex.value)) {
     flashcardStatus.value.needsReview.push(currentFlashcardIndex.value);
   }
 };
@@ -184,11 +190,13 @@ const moveToNextFlashcard = () => {
   }
 
   // After updating the currentFlashcardIndex, play the audio
-  const currentCard = flashcards.value[currentFlashcardIndex.value];
-  if (currentCard && currentCard.learning_language_text) {
-    showFeedback.value = false; // Hide feedback for the next card
-    userTranslation.value = ''; // Clear input
-    playCurrentCardAudio(); // Play audio for the new card
+  showFeedback.value = false; // Hide feedback for the next card
+  userTranslation.value = ''; // Clear input
+
+  // Play audio for the new current flashcard
+  const currentFlashcard = flashcards.value[currentFlashcardIndex.value];
+  if (currentFlashcard && currentFlashcard.learning_language_text) {
+    playAudio(currentFlashcard.learning_language_text);
   }
 };
 
