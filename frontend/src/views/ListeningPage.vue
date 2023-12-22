@@ -20,13 +20,27 @@
         </select>
       </div>
     </div>
-    <button @click="processInput">Generate Flashcards</button>
+    <button @click="generateFlashcards">Generate Flashcards</button>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import axios from 'axios';
+let baseURL = ''; // Default empty baseURL
+
+// Check if the app is running locally or on Vercel
+if (process.env.NODE_ENV === 'development') {
+  // Running locally
+  baseURL = 'http://localhost:5000'; // Set your local Flask server URL here
+} else {
+  // Running on Vercel (or other deployment)
+  // Set the production server URL here
+  // Example: baseURL = 'https://your-production-api-url.com'
+}
+
+// Set the baseURL for Axios
+axios.defaults.baseURL = baseURL;
 
 const userInput = ref('');
 const learningLanguage = ref('pt'); // Default learning language
@@ -43,13 +57,20 @@ const primaryLanguage = ref('en'); // Default primary language
 //   }
 // };
 
-const processInput = async () => {
+const generateFlashcards = async () => {
   try {
-    const response = await axios.post('http://localhost:5000/api/process-notes', { notes: userInput.value });
+    // Create a data object with the required fields
+    const requestData = {
+      text: userInput.value,
+      learning_language: learningLanguage.value,
+      primary_language: primaryLanguage.value,
+    };
+
+    const response = await axios.post('/api/process-notes', requestData);
     // Handle the response, such as updating flashcards data
-    console.log(response);
+    console.log(response.data);
   } catch (error) {
-    console.error('Error processing notes:', error);
+    console.error('Error generating flashcards:', error);
   }
 };
 

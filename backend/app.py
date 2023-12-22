@@ -1,9 +1,13 @@
-from flask import Flask, send_file, request, jsonify
-from gtts import gTTS
+import requests
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import os
+import json
 import re
 
 app = Flask(__name__)
+CORS(app)  # This enables CORS for your entire Flask app.
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route('/get-audio/<phrase>', methods=['GET'])
 def get_audio(phrase):
@@ -12,20 +16,78 @@ def get_audio(phrase):
     tts.save(audio_file)
     return send_file(audio_file, as_attachment=True)
 
+
 @app.route('/api/process-notes', methods=['POST'])
 def process_notes():
     data = request.json
-    raw_notes = data.get('notes', '')
+    raw_text = data['text']
+    learning_language = data['learning_language']
+    primary_language = data['primary_language']
     
-    # Simple parsing logic (customize as needed)
-    # Splitting notes into sentences/phrases using a regular expression
-    phrases = re.split(r'[.!?]+', raw_notes)
-    phrases = [phrase.strip() for phrase in phrases if phrase.strip()]
+    # Define the API endpoint
+    endpoint = "https://api.openai.com/v1/chat/completions"
+    
+    # Define the request headers
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {openai_api_key}"
+    }
+    
+    # Define the request payload
+    payload = {
+        "model": "gpt-3.5-turbo",
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant that translates notes into flashcards."},
+            {"role": "user", "content": f"I am learning {learning_language} and my primary language is {primary_language}."},
+            {"role": "user", "content": "Here are raw notes I took from a class. Take these raw notes and help me structure them into flashcards that I can study."},
+            {"role": "user", "content": f"""
+                Specifically, the flashcard structure would look something like:
+                        {{
+                            flashcards: [
+                                {{ 
+                                    learning_language_text: "elas falam sobre tarefas",  
+                                    primary_language_text: "They talk about tasks"
+                                }},
+                                ...
+                            ]
+                        }}
 
-    # Structure the data for flashcards
-    flashcards = [{'text': phrase} for phrase in phrases]
+                        Here is the dump of the raw notes:
+                        {raw_text}
+            """
+            },
+            {"role": "user", "content": "here's the raw text: \n" + raw_text}
+        ],
+        "temperature": 0.7
+    }
+    
+    # Make the API call
+    response = requests.post(endpoint, headers=headers, json=payload)
+    
+    # Check if the API call was successful
+    if response.status_code == 200:
+        api_response = response.json()
+        message_content = api_response['choices'][0]['message']['content']
 
-    return jsonify({'flashcards': flashcards})
+        # Extract JSON string using regular expression
+        match = re.search(r'\{.*\}', message_content, re.DOTALL)
+        if match:
+            json_string = match.group(0)
+
+            try:
+                # Parse the JSON string into a dictionary
+                print(json_string)
+                flashcards_dict = json.loads(json_string)
+                print(flashcards_dict)
+                return jsonify({'flashcards': flashcards_dict})
+            except json.JSONDecodeError as e:
+                print("error " + e.toString())
+                return jsonify({'error': 'Extracted string is not valid JSON'}), 400
+        else:
+            return jsonify({'error': 'No JSON data found in the response'}), 400
+    else:
+        return jsonify({'error': 'API request failed'}), response.status_code
+
 
 if __name__ == '__main__':
     app.run(debug=True)
