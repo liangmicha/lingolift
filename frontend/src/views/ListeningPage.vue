@@ -20,8 +20,7 @@
         </select>
       </div>
     </div>
-
-    <button @click="generateExercises">Generate learning exercises</button>
+    <button @click="processInput">Generate Flashcards</button>
   </div>
 </template>
 
@@ -33,21 +32,25 @@ const userInput = ref('');
 const learningLanguage = ref('pt'); // Default learning language
 const primaryLanguage = ref('en'); // Default primary language
 
-const fetchAudio = async (phrase) => {
-  try {
-    const response = await axios.get(`http://localhost:5000/get-audio/${phrase}`, { responseType: 'blob' });
-    const url = URL.createObjectURL(new Blob([response.data]));
-    const audio = new Audio(url);
-    audio.play();
-  } catch (error) {
-    console.error("Error fetching audio:", error);
-  }
-};
+// const fetchAudio = async (phrase) => {
+//   try {
+//     const response = await axios.get(`http://localhost:5000/get-audio/${phrase}`, { responseType: 'blob' });
+//     const url = URL.createObjectURL(new Blob([response.data]));
+//     const audio = new Audio(url);
+//     audio.play();
+//   } catch (error) {
+//     console.error("Error fetching audio:", error);
+//   }
+// };
 
-const generateExercises = async () => {
-  console.log('Exercises generation initiated');
-  // Call fetchAudio here, replace 'yourPhrase' with the actual phrase
-  await fetchAudio('yourPhrase');
+const processInput = async () => {
+  try {
+    const response = await axios.post('http://localhost:5000/api/process-notes', { notes: userInput.value });
+    // Handle the response, such as updating flashcards data
+    console.log(response);
+  } catch (error) {
+    console.error('Error processing notes:', error);
+  }
 };
 
 </script>
