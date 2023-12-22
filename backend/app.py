@@ -1,9 +1,10 @@
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
 import json
 import re
+import gtts
 
 app = Flask(__name__)
 CORS(app)  # This enables CORS for your entire Flask app.
@@ -11,7 +12,7 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route('/get-audio/<phrase>', methods=['GET'])
 def get_audio(phrase):
-    tts = gTTS(phrase, lang='en')  # Set the language as needed
+    tts = gtts.gTTS(phrase, lang='pt')  # Adjust the language as needed
     audio_file = f"{phrase}.mp3"
     tts.save(audio_file)
     return send_file(audio_file, as_attachment=True)
@@ -61,6 +62,24 @@ def process_notes():
         "temperature": 0.7
     }
     
+    if True:
+        flashcards_dict = {
+            "flashcards": [
+                {
+                "learning_language_text": "trabalhei",
+                "primary_language_text": "I worked"
+                },
+                {
+                "learning_language_text": "desde",
+                "primary_language_text": "since"
+                },
+                {
+                "learning_language_text": "desde às seis da manhã",
+                "primary_language_text": "since six in the morning"
+                }
+            ]
+        }
+        return jsonify({'flashcards': flashcards_dict})
     # Make the API call
     response = requests.post(endpoint, headers=headers, json=payload)
     
@@ -78,7 +97,6 @@ def process_notes():
                 # Parse the JSON string into a dictionary
                 print(json_string)
                 flashcards_dict = json.loads(json_string)
-                print(flashcards_dict)
                 return jsonify({'flashcards': flashcards_dict})
             except json.JSONDecodeError as e:
                 print("error " + e.toString())
