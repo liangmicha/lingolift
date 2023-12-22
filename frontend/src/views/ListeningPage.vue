@@ -25,16 +25,25 @@
       <div class="progress-bar" :style="{ width: progressBarWidth + '%' }"></div>
     </div>
     <div v-if="flashcards.length > 0">
-      <div class="flashcard">
-        <!-- Play button to play the audio -->
+      <div class="flashcard" @keyup.enter="isCorrectAnswer !== null ? moveToNextFlashcard() : checkTranslation()">
         <button class="play-audio-button" @click="playCurrentCardAudio">Play</button>
-        <!-- User input for translation -->
-        <input type="text" 
-          v-model="userTranslation" 
-          @keyup.enter="checkTranslation" 
-          :class="{ 'correct-answer': isCorrectAnswer, 'incorrect-answer': isCorrectAnswer !== null && !isCorrectAnswer }"
-          placeholder="Type your translation">
-        <button @click="checkTranslation">Check</button>
+
+        <div v-if="showFeedback">
+          <p class="feedback-message" :class="{ 'correct': isCorrectAnswer, 'incorrect': !isCorrectAnswer }">
+            {{ isCorrectAnswer ? 'Correct!' : 'Incorrect!' }}
+          </p>
+          <p><strong>Learning Language:</strong> {{ flashcards[currentFlashcardIndex].learning_language_text }}</p>
+          <p><strong>Fluent Language:</strong> {{ flashcards[currentFlashcardIndex].primary_language_text }}</p>
+          <button @click="moveToNextFlashcard">Next</button>
+        </div>
+
+        <div v-else>
+          <input type="text" 
+            v-model="userTranslation" 
+            @keyup.enter="checkTranslation" 
+            placeholder="Type your translation">
+          <button @click="checkTranslation">Check</button>
+        </div>
       </div>
     </div>
   </div>
@@ -66,6 +75,7 @@ const currentFlashcardIndex = ref(0);
 const flashcardStatus = ref({ needsReview: [], reviewed: [] });
 const userTranslation = ref('');
 const isCorrectAnswer = ref(null);
+const showFeedback = ref(false);
 
 const progressBarWidth = computed(() => {
   const total = flashcards.length;
@@ -100,6 +110,11 @@ const generateFlashcards = async () => {
     flashcards.value = responseFlashcards;
     flashcardStatus.value.needsReview = responseFlashcards.map((_, index) => index);
     currentFlashcardIndex.value = 0;
+
+    // Play audio for the first flashcard
+    if (flashcards.value.length > 0 && flashcards.value[0].learning_language_text) {
+      playAudio(flashcards.value[0].learning_language_text);
+    }
   } catch (error) {
     console.error('Error generating flashcards:', error);
   }
@@ -109,18 +124,11 @@ const checkTranslation = () => {
   const currentCard = flashcards.value[currentFlashcardIndex.value];
   const isCorrect = similarity(currentCard.primary_language_text, userTranslation.value) >= 0.95;
   isCorrectAnswer.value = isCorrect;
-  if (isCorrect) {
-    // Move to 'Reviewed' bucket
-    flashcardStatus.value.reviewed.push(currentFlashcardIndex.value);
-  } else {
-    // Keep in or return to 'Needs review' bucket
-    if (!flashcardStatus.value.needsReview.includes(currentFlashcardIndex.value)) {
-      flashcardStatus.value.needsReview.push(currentFlashcardIndex.value);
-    }
-  }
+  showFeedback.value = true; // Show feedback after checking
 
-  userTranslation.value = ''; // Clear input
-  moveToNextFlashcard(); // Function to move to the next flashcard
+  if (!isCorrect && !flashcardStatus.value.needsReview.includes(currentFlashcardIndex.value)) {
+    flashcardStatus.value.needsReview.push(currentFlashcardIndex.value);
+  }
 };
 
 function getEditDistance(a, b) {
@@ -178,7 +186,9 @@ const moveToNextFlashcard = () => {
   // After updating the currentFlashcardIndex, play the audio
   const currentCard = flashcards.value[currentFlashcardIndex.value];
   if (currentCard && currentCard.learning_language_text) {
-    playAudio(currentCard.learning_language_text);
+    showFeedback.value = false; // Hide feedback for the next card
+    userTranslation.value = ''; // Clear input
+    playCurrentCardAudio(); // Play audio for the new card
   }
 };
 
@@ -291,5 +301,18 @@ button:hover {
 
 .incorrect-answer {
   border-color: red;
+}
+
+.feedback-message {
+  font-size: 1.2em;
+  margin: 10px 0;
+}
+
+.feedback-message.correct {
+  color: green;
+}
+
+.feedback-message.incorrect {
+  color: red;
 }
 </style>
