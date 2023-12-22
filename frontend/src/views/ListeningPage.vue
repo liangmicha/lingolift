@@ -40,7 +40,6 @@
         <div v-else>
           <input type="text" 
             v-model="userTranslation" 
-            @keyup.enter="checkTranslation" 
             placeholder="Type your translation">
           <button @click="checkTranslation">Check</button>
         </div>
@@ -78,9 +77,14 @@ const isCorrectAnswer = ref(null);
 const showFeedback = ref(false);
 
 const progressBarWidth = computed(() => {
-  const total = flashcards.value.length;
-  const reviewed = flashcardStatus.value.reviewed.length;
-  return (reviewed / total) * 100;
+  if (flashcards.value !== null) {
+    const total = flashcards.value.length;
+    const reviewed = flashcardStatus.value.reviewed.length;
+    console.log(`Reviewed: ${reviewed} ${flashcardStatus.value.reviewed} and Total: ${total} ${flashcards.value}`);
+    return (reviewed / total) * 100;
+  } else {
+    return 0;
+  }
 });
 
 const playAudio = async (phrase) => {
@@ -89,6 +93,7 @@ const playAudio = async (phrase) => {
     const url = URL.createObjectURL(new Blob([response.data]));
     const audio = new Audio(url);
     audio.play();
+    console.log(progressBarWidth.value);
   } catch (error) {
     console.error("Error fetching audio:", error);
   }
@@ -128,12 +133,6 @@ const checkTranslation = () => {
 
   if (isCorrect) {
     flashcardStatus.value.reviewed.push(currentFlashcardIndex.value);
-    const index = flashcardStatus.value.needsReview.indexOf(currentFlashcardIndex.value);
-    if (index > -1) {
-      flashcardStatus.value.needsReview.splice(index, 1);
-    }
-  } else if (!flashcardStatus.value.needsReview.includes(currentFlashcardIndex.value)) {
-    flashcardStatus.value.needsReview.push(currentFlashcardIndex.value);
   }
 };
 
