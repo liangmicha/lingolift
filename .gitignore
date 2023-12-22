@@ -3,7 +3,7 @@ node_modules
 /dist
 backend/venv/
 backend/__pycache__/
-backned/*.mp3
+backend/*.mp3
 
 # local env files
 .env.local
