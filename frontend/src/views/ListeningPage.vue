@@ -77,13 +77,13 @@ const isCorrectAnswer = ref(null);
 const showFeedback = ref(false);
 
 const progressBarWidth = computed(() => {
-  if (flashcards.value !== null) {
+  if (flashcards.value == null || flashcardStatus.value.reviewed.length == 0) {
+    return 0;
+  } else {
     const total = flashcards.value.length;
     const reviewed = flashcardStatus.value.reviewed.length;
     console.log(`Reviewed: ${reviewed} ${flashcardStatus.value.reviewed} and Total: ${total} ${flashcards.value}`);
     return (reviewed / total) * 100;
-  } else {
-    return 0;
   }
 });
 
@@ -93,7 +93,7 @@ const playAudio = async (phrase) => {
     const url = URL.createObjectURL(new Blob([response.data]));
     const audio = new Audio(url);
     audio.play();
-    console.log(progressBarWidth.value);
+    console.log(`progressBarWith is: ${progressBarWidth.value}`);
   } catch (error) {
     console.error("Error fetching audio:", error);
   }
