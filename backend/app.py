@@ -5,6 +5,7 @@ import os
 import json
 import re
 import gtts
+import time
 
 app = Flask(__name__)
 CORS(app)  # This enables CORS for your entire Flask app.
@@ -63,6 +64,7 @@ def process_notes():
     }
     
     if True:
+        time.sleep(5)
         flashcards_dict = {
             "flashcards": [
                 {

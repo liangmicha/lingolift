@@ -20,7 +20,8 @@
         </select>
       </div>
     </div>
-    <button @click="generateFlashcards">Generate Flashcards</button>
+    <button @click="generateFlashcards" :disabled="isLoading">Generate Flashcards</button>
+    <div class="loading-spinner" v-if="isLoading"></div>
     <div class="progress-bar-container">
       <div class="progress-bar" :style="{ width: progressBarWidth + '%' }"></div>
     </div>
@@ -75,6 +76,8 @@ const flashcardStatus = ref({ needsReview: [], reviewed: [] });
 const userTranslation = ref('');
 const isCorrectAnswer = ref(null);
 const showFeedback = ref(false);
+const isLoading = ref(false);
+
 
 const progressBarWidth = computed(() => {
   if (flashcards.value == null || flashcardStatus.value.reviewed.length == 0) {
@@ -100,6 +103,7 @@ const playAudio = async (phrase) => {
 };
 
 const generateFlashcards = async () => {
+  isLoading.value = true; // Start loading
   try {
     // Create a data object with the required fields
     const requestData = {
@@ -123,6 +127,7 @@ const generateFlashcards = async () => {
   } catch (error) {
     console.error('Error generating flashcards:', error);
   }
+  isLoading.value = false; // End loading
 };
 
 const checkTranslation = () => {
@@ -336,4 +341,20 @@ button:hover {
   background-color: #4caf50; /* Green color for the progress bar */
   transition: width 0.3s ease;
 }
+
+.loading-spinner {
+  border: 5px solid #f3f3f3; /* Light grey */
+  border-top: 5px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 </style>
