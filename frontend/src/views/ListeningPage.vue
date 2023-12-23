@@ -21,7 +21,21 @@
       </div>
     </div>
     <button @click="generateFlashcards" :disabled="isLoading">Generate Flashcards</button>
-    <div class="loading-spinner" v-if="isLoading"></div>
+    <div class="loading-container" v-if="isLoading">
+      <div class="octopus">
+        <div class="tentacle"></div>
+        <div class="tentacle"></div>
+        <div class="tentacle"></div>
+        <div class="tentacle"></div>
+        <div class="octopus-body">
+          <div class="eye left-eye"></div>
+          <div class="eye right-eye"></div>
+        </div>
+      </div>
+    </div>
+
+
+
     <div class="progress-bar-container">
       <div class="progress-bar" :style="{ width: progressBarWidth + '%' }"></div>
     </div>
@@ -342,19 +356,80 @@ button:hover {
   transition: width 0.3s ease;
 }
 
-.loading-spinner {
-  border: 5px solid #f3f3f3; /* Light grey */
-  border-top: 5px solid #3498db; /* Blue */
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 2s linear infinite;
-  margin: 20px auto;
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px; /* Adjust as needed */
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.octopus {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.octopus-body {
+  width: 60px;
+  height: 60px;
+  background-color: #1abc9c; /* Ocean green */
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: relative; /* To position eyes correctly */
+}
+
+.tentacle {
+  width: 70px;
+  height: 8px; /* Skinnier tentacles */
+  background-color: #16a085; /* Darker shade of ocean green */
+  border-radius: 10px;
+  position: absolute;
+  left: 50%;
+  transform-origin: left center;
+  animation: waveTentacle 2s ease-in-out infinite;
+}
+
+.tentacle:nth-child(1) { top: 15%; transform: rotate(60deg); }
+.tentacle:nth-child(2) { top: 35%; transform: rotate(45deg); }
+.tentacle:nth-child(3) { top: 55%; transform: rotate(30deg); }
+.tentacle:nth-child(4) { top: 75%; transform: rotate(15deg); }
+
+.eye {
+  width: 15px;
+  height: 15px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 25%;
+}
+
+.eye::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  background-color: black;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 3px;
+}
+
+.left-eye {
+  left: 15%;
+}
+
+.right-eye {
+  right: 15%;
+}
+
+@keyframes waveTentacle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
 }
 
 </style>
