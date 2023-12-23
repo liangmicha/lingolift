@@ -322,4 +322,18 @@ button:hover {
 .feedback-message.incorrect {
   color: red;
 }
+
+.progress-bar-container {
+  margin: 20px 0;
+  padding: 10px;
+  background-color: #f0f0f0; /* Light grey background */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+  height: 20px; /* Set a visible height for the progress bar */
+  background-color: #4caf50; /* Green color for the progress bar */
+  transition: width 0.3s ease;
+}
 </style>
