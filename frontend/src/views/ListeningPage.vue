@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
 let baseURL = ''; // Default empty baseURL
 
@@ -80,23 +80,6 @@ if (process.env.NODE_ENV === 'development') {
 
 // Set the baseURL for Axios
 axios.defaults.baseURL = baseURL;
-
-let rotateInterval;
-let rotateDirection = 1; // 1 for clockwise, -1 for counterclockwise
-let rotationDegree = 0;
-onMounted(() => {
-  rotateInterval = setInterval(() => {
-    const octopus = document.querySelector('.octopus');
-    if (octopus) {
-      rotateDirection *= -1; // Toggle direction
-      octopus.style.transform = `rotate(${rotateDirection * 360}deg)`;
-    }
-  }, 1000); // Rotate every 0.5 seconds
-});
-
-onUnmounted(() => {
-  clearInterval(rotateInterval);
-});
 
 const userInput = ref('');
 const learningLanguage = ref('pt'); // Default learning language
@@ -384,7 +367,6 @@ button:hover {
   position: relative;
   width: 100px;
   height: 100px;
-  transition: transform 2s ease-in-out; /* Smooth transition for rotation */
 }
 
 .octopus-body {

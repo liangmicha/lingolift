@@ -64,7 +64,7 @@ def process_notes():
     }
     
     if True:
-        time.sleep(5)
+        time.sleep(2)
         flashcards_dict = {
             "flashcards": [
                 {
