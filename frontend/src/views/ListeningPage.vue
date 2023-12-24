@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 let baseURL = ''; // Default empty baseURL
 
@@ -91,6 +91,23 @@ const userTranslation = ref('');
 const isCorrectAnswer = ref(null);
 const showFeedback = ref(false);
 const isLoading = ref(false);
+
+let rotateInterval;
+let rotateDirection = 1; // 1 for clockwise, -1 for counterclockwise
+
+onMounted(() => {
+  rotateInterval = setInterval(() => {
+    const octopus = document.querySelector('.octopus');
+    if (octopus) {
+      rotateDirection *= -1; // Toggle direction
+      octopus.style.transform = `rotate(${rotateDirection * 360}deg)`;
+    }
+  }, 2000); // Rotate every 2 seconds
+});
+
+onUnmounted(() => {
+  clearInterval(rotateInterval);
+});
 
 
 const progressBarWidth = computed(() => {
@@ -367,6 +384,7 @@ button:hover {
   position: relative;
   width: 100px;
   height: 100px;
+  transition: transform 2s ease-in-out; /* Smooth transition for rotation */
 }
 
 .octopus-body {
