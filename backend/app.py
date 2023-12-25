@@ -41,7 +41,7 @@ def process_notes():
         "messages": [
             {"role": "system", "content": "You are a helpful assistant that translates notes into flashcards."},
             {"role": "user", "content": f"I am learning {learning_language} and my primary language is {primary_language}."},
-            {"role": "user", "content": "Here are raw notes I took from a class. Take these raw notes and help me structure them into flashcards that I can study."},
+            {"role": "user", "content": "Here are raw notes I took from a class. Take these raw notes and help me structure them into flashcards that I can study. Do not make flashcards for anything that is not in the learning language. Sometimes I take notes in the primary language, either omit them, or translate them to the learning langauge first. No learning_language_text in the response should be in the primary language. Omit anything that looks like just grammar or notes that are symbols or notes that do not make sense. Correct any typos in either language. If I forgot to put accents on the letter when they should be there, please correct them too before returning. Sometimes I put english in parenthesis, do not include that."},
             {"role": "user", "content": f"""
                 Specifically, the flashcard structure would look something like:
                         {{
@@ -63,7 +63,7 @@ def process_notes():
         "temperature": 0.7
     }
     
-    if True:
+    if False:
         time.sleep(5)
         flashcards_dict = {
             "flashcards": [
