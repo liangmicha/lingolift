@@ -23,13 +23,17 @@
     <button @click="generateFlashcards" :disabled="isLoading">Generate Flashcards</button>
     <div class="loading-container" v-if="isLoading">
       <div class="octopus">
-        <div class="tentacle"></div>
+        <div class="tentacle">
+          <div class="suction-cup"></div>
+          <div class="suction-cup"></div>
+        </div>
         <div class="tentacle"></div>
         <div class="tentacle"></div>
         <div class="tentacle"></div>
         <div class="octopus-body">
           <div class="eye left-eye"></div>
           <div class="eye right-eye"></div>
+          <div class="mouth"></div> <!-- Add this line for the mouth -->
         </div>
       </div>
     </div>
@@ -93,21 +97,34 @@ const showFeedback = ref(false);
 const isLoading = ref(false);
 
 let rotateInterval;
+let adjustInterval;
 let rotateDirection = 1; // 1 for clockwise, -1 for counterclockwise
 
+// Interactive Rotation
 onMounted(() => {
   rotateInterval = setInterval(() => {
     const octopus = document.querySelector('.octopus');
     if (octopus) {
-      rotateDirection *= -1; // Toggle direction
-      octopus.style.transform = `rotate(${rotateDirection * 360}deg)`;
+      rotateDirection = Math.random() > 0.5 ? 1 : -1; // Randomize direction
+      octopus.style.transform = `rotate(${rotateDirection * (Math.random() * 360)}deg)`;
     }
-  }, 2000); // Rotate every 2 seconds
+  }, 1500); // Rotate every 1.5 seconds
+
+  adjustInterval = setInterval(adjustTentacles, Math.random() * 500 + 250); // Adjust every 0.5-0.75 seconds
 });
 
 onUnmounted(() => {
   clearInterval(rotateInterval);
+  clearInterval(adjustInterval);
 });
+
+const adjustTentacles = () => {
+  const tentacles = document.querySelectorAll('.tentacle');
+  tentacles.forEach(tentacle => {
+    const randomRotation = Math.random() * 10 - 5; // Random rotation between -5 and 5 degrees
+    tentacle.style.transform = `rotate(${randomRotation}deg)`;
+  });
+};
 
 
 const progressBarWidth = computed(() => {
@@ -397,6 +414,7 @@ button:hover {
   left: 50%;
   transform: translate(-50%, -50%);
   position: relative; /* To position eyes correctly */
+  background: linear-gradient(135deg, #1abc9c 40%, #16a085 60%);
 }
 
 .tentacle {
@@ -407,14 +425,40 @@ button:hover {
   position: absolute;
   left: 50%;
   transform-origin: left center;
-  animation: waveTentacle 2s ease-in-out infinite;
+  animation: waveTentacle 1.5s ease-in-out infinite;
+  transition: transform 0.5s ease-in-out;
 }
 
-.tentacle:nth-child(1) { top: 15%; transform: rotate(60deg); }
-.tentacle:nth-child(2) { top: 35%; transform: rotate(45deg); }
-.tentacle:nth-child(3) { top: 55%; transform: rotate(30deg); }
-.tentacle:nth-child(4) { top: 75%; transform: rotate(15deg); }
+.tentacle:nth-child(1) { 
+  top: 15%;
+  transform: rotate(60deg); 
+  animation-duration: 1.8s;
+}
+.tentacle:nth-child(2) {
+  top: 35%;
+  transform: rotate(45deg);
+  animation-duration: 1.2s;
+}
+.tentacle:nth-child(3) { 
+  top: 55%;
+  transform: rotate(30deg);
+  animation-duration: 1.4s; 
+}
+.tentacle:nth-child(4) {
+  top: 75%;
+  transform: rotate(15deg);
+  animation-duration: 1.9s;
+}
 
+/* Suction Cups Styling */
+.suction-cup {
+  width: 4px;
+  height: 4px;
+  background-color: #fff;
+  border-radius: 50%;
+  position: absolute;
+  /* Position each suction cup along the tentacle */
+}
 .eye {
   width: 15px;
   height: 15px;
@@ -422,6 +466,27 @@ button:hover {
   border-radius: 50%;
   position: absolute;
   top: 25%;
+}
+
+.mouth {
+  width: 30px; /* Adjust width as needed */
+  height: 15px; /* Adjust height as needed */
+  border: 3px solid transparent; /* Transparent border with thickness */
+  border-top-color: #000; /* Only the top border is visible */
+  border-radius: 50%; /* Full curve */
+  position: absolute;
+  bottom: 15px; /* Lowered the smile */
+  left: 50%;
+  transform: translateX(-50%) scaleY(-1); /* Invert the curve to create a smile */
+}
+
+/* Eye Enhancements */
+.eye::before {
+  /* Create an additional layer in the eye for depth */
+}
+
+@keyframes waveTentacle {
+  /* Update the animation for more fluid movement */
 }
 
 .eye::after {
@@ -444,10 +509,21 @@ button:hover {
   right: 15%;
 }
 
+
 @keyframes waveTentacle {
-  0%, 100% { transform: rotate(0); }
-  25% { transform: rotate(-10deg); }
-  75% { transform: rotate(10deg); }
+  0%, 100% {
+    transform: rotate(0deg) translate3d(0, 0, 0);
+  }
+  25% {
+    transform: rotate(5deg) translate3d(0, -10px, 0);
+  }
+  50% {
+    transform: rotate(-5deg) translate3d(0, 10px, 0);
+  }
+  75% {
+    transform: rotate(5deg) translate3d(0, -10px, 0);
+  }
 }
+
 
 </style>
